@@ -1,0 +1,58 @@
+docker run -v /local/ml/mhariat/cifar_100:/usr/share/bind_mount/data/cifar_100 \
+           -v /local/ml/mhariat/cifar_10:/usr/share/bind_mount/data/cifar_10 \
+           -v /local/ml/mhariat/dogs_cats:/usr/share/bind_mount/data/dogs_cats \
+           -v /home/mhariat/SkipNet:/usr/share/bind_mount/scripts/SkipNet \
+           --rundocker run -v /local/ml/mhariat/cifar_100:/usr/share/bind_mount/data/cifar_100 \
+           -v /local/ml/mhariat/cifar_10:/usr/share/bind_mount/data/cifar_10 \
+           -v /local/ml/mhariat/dogs_cats:/usr/share/bind_mount/data/dogs_cats \
+           -v /home/mhariat/SkipNet:/usr/share/bind_mount/scripts/SkipNet \
+           --runtime nvidia \
+           --name skip_net \
+           --net host \
+           --ipc host \
+           --init \
+           --shm-size=2gb \
+           -it mhariat/pruningtime nvidia \
+           --name skip_net \
+           --net host \
+           --ipc host \
+           --init \
+           --shm-size=2gb \
+           -it mhariat/pruning
+
+
+
+## cifar_10/100 SP part
+CUDA_VISIBLE_DEVICES=1 python /usr/share/bind_mount/scripts/SkipNet/main_sp.py --network resnet \
+                                                                               --depth 32 \
+                                                                               --epochs 200 \
+                                                                               --lr 0.0001 \
+                                                                               --bs 128 \
+                                                                               --num_workers 16 \
+                                                                               --momentum 0.9 \
+                                                                               --weight_decay 0.0005 \
+                                                                               --img_type png \
+                                                                               --resize 32 \
+                                                                               --result_dir /app/results \
+                                                                               --data_dir /usr/share/bind_mount/data/cifar_100 \
+                                                                               --resume True
+
+
+## cifar_10/100 RL part
+CUDA_VISIBLE_DEVICES=3 python /usr/share/bind_mount/scripts/SkipNet/main_rl.py --network resnet \
+                                                                               --depth 32 \
+                                                                               --epochs 100 \
+                                                                               --lr 0.001 \
+                                                                               --bs 256 \
+                                                                               --num_workers 16 \
+                                                                               --momentum 0.9 \
+                                                                               --weight_decay 0.0005 \
+                                                                               --img_type png \
+                                                                               --resize 32 \
+                                                                               --result_dir /app/results \
+                                                                               --data_dir /usr/share/bind_mount/data/cifar_100 \
+                                                                               --alpha 0.1 \
+                                                                               --gamma 1 \
+                                                                               --rl_weight 0.1
+
+CUDA_VISIBLE_DEVICES=0,1 python /usr/share/bind_mount/scripts/SkipNet/main_prune.py --config_path /usr/share/bind_mount/scripts/SkipNet/config.json
