@@ -28,7 +28,7 @@ others amongst the dataset. In this part we used the paper
 |------------------------------|----------|-------------------|-------------|
 | w/o Pruning                  | 78.19%   | 2.20              | 0%          |
 | w/ Static Pruning only       | 77.48%   | 0.51              |  60%        |
-| w/ Static and Dynamic Pruning| 77.36%   | 0.4               | 60%%      |
+| w/ Static and Dynamic Pruning| 77.36%   | 0.40              | 60%         |
 
 Our purpose is to investigate the adding value of the smart switches. To
 do so, a hard threshold of one percent loss on the accuracy is imposed. Then the results
